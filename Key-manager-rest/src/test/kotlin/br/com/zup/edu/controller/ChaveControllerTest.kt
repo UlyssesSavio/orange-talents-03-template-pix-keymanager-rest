@@ -20,10 +20,7 @@ import javax.inject.Singleton
 
 
 @MicronautTest
-internal class CadastraChaveControllerTest{
-
-    @Inject
-    lateinit var objectMapper: ObjectMapper
+internal class ChaveControllerTest{
 
     @Inject
     @field:Client("/")
@@ -32,9 +29,14 @@ internal class CadastraChaveControllerTest{
     @Inject
     lateinit var gRpcClient: KeyManagerServiceGrpc.KeyManagerServiceBlockingStub
 
+    @Inject
+    lateinit var gRpcClientRemove: KeyManagerRemoveGrpc.KeyManagerRemoveBlockingStub
+
     @AfterEach
     fun antesDeCada(){
         Mockito.reset(gRpcClient)
+        Mockito.reset(gRpcClientRemove)
+
     }
 
     @Test
@@ -58,7 +60,7 @@ internal class CadastraChaveControllerTest{
 
         Assertions.assertEquals(resultado.code(), 201)
        // Assertions.assertEquals(resultado.body()!!.chavePix, requestGrpc.chaveASerGerada)
-        println(resultado.headers.get("Location"))
+
 
 
     }
@@ -76,7 +78,6 @@ internal class CadastraChaveControllerTest{
 
         val cadastraChaveRequest = CadastraChaveRequest(requestGrpc.identificadorCliente, requestGrpc.chaveASerGerada, requestGrpc.tipo, requestGrpc.tipoChave)
 
-        val responseGrpc = KeyPixResponse.newBuilder().setChavePix("36371803085").build()
 
         Mockito.`when`(gRpcClient.cadastra(requestGrpc)).thenThrow(Status.NOT_FOUND.asRuntimeException())
 
@@ -102,7 +103,6 @@ internal class CadastraChaveControllerTest{
 
         val cadastraChaveRequest = CadastraChaveRequest(requestGrpc.identificadorCliente, requestGrpc.chaveASerGerada, requestGrpc.tipo, requestGrpc.tipoChave)
 
-        val responseGrpc = KeyPixResponse.newBuilder().setChavePix("36371803085").build()
 
         Mockito.`when`(gRpcClient.cadastra(requestGrpc)).thenThrow(Status.INVALID_ARGUMENT.asRuntimeException())
 
@@ -128,7 +128,6 @@ internal class CadastraChaveControllerTest{
 
         val cadastraChaveRequest = CadastraChaveRequest(requestGrpc.identificadorCliente, requestGrpc.chaveASerGerada, requestGrpc.tipo, requestGrpc.tipoChave)
 
-        val responseGrpc = KeyPixResponse.newBuilder().setChavePix("36371803085").build()
 
         Mockito.`when`(gRpcClient.cadastra(requestGrpc)).thenThrow(Status.ALREADY_EXISTS.asRuntimeException())
 
@@ -154,7 +153,6 @@ internal class CadastraChaveControllerTest{
 
         val cadastraChaveRequest = CadastraChaveRequest(requestGrpc.identificadorCliente, requestGrpc.chaveASerGerada, requestGrpc.tipo, requestGrpc.tipoChave)
 
-        val responseGrpc = KeyPixResponse.newBuilder().setChavePix("36371803085").build()
 
         Mockito.`when`(gRpcClient.cadastra(requestGrpc)).thenThrow(Status.INTERNAL.asRuntimeException())
 
@@ -165,6 +163,107 @@ internal class CadastraChaveControllerTest{
         Assertions.assertEquals(resultado.status.code, 500)
 
 
+
+
+    }
+
+
+    @Test
+    fun `deve deletar um usuario`(){
+
+        val requestGrpc = KeyRemoveRequest.newBuilder()
+            .setIdUsuario("123")
+            .setChave("123")
+            .build()
+
+        val removeChaveRequest= RemoveChaveRequest(requestGrpc.idUsuario, requestGrpc.chave)
+
+        val responseGrpc = KeyRemoveResponse.newBuilder()
+            .setChave(requestGrpc.chave)
+            .setIdUsuario(requestGrpc.idUsuario)
+            .build()
+
+        Mockito.`when`(gRpcClientRemove.remove(requestGrpc)).thenReturn(responseGrpc)
+
+        val resultado = client.toBlocking().exchange<RemoveChaveRequest, RemoveChaveResponse>(HttpRequest.POST("/api/remove", removeChaveRequest))
+
+        Assertions.assertEquals(resultado.code(), 200)
+
+
+    }
+
+    @Test
+    fun `deve dar chave nao encontrada ao deletar`(){
+
+        val requestGrpc = KeyRemoveRequest.newBuilder()
+            .setIdUsuario("123")
+            .setChave("123")
+            .build()
+
+        val removeChaveRequest= RemoveChaveRequest(requestGrpc.idUsuario, requestGrpc.chave)
+
+
+        Mockito.`when`(gRpcClientRemove.remove(requestGrpc)).thenThrow(Status.NOT_FOUND.asRuntimeException())
+
+        val resultado = Assertions.assertThrows(HttpClientResponseException::class.java) {
+            client.toBlocking()
+                .exchange<RemoveChaveRequest, RemoveChaveResponse>(HttpRequest.POST("/api/remove", removeChaveRequest))
+        }
+        Assertions.assertEquals(resultado.status.code, 404)
+
+
+    }
+
+    @Test
+    fun `deve dar sem permissao para deletar`(){
+
+        val requestGrpc = KeyRemoveRequest.newBuilder()
+            .setIdUsuario("123")
+            .setChave("123")
+            .build()
+
+        val removeChaveRequest= RemoveChaveRequest(requestGrpc.idUsuario, requestGrpc.chave)
+
+
+        Mockito.`when`(gRpcClientRemove.remove(requestGrpc)).thenThrow(Status.PERMISSION_DENIED.asRuntimeException())
+
+        val resultado = Assertions.assertThrows(HttpClientResponseException::class.java) {
+            client.toBlocking()
+                .exchange<RemoveChaveRequest, RemoveChaveResponse>(HttpRequest.POST("/api/remove", removeChaveRequest))
+        }
+        Assertions.assertEquals(resultado.status.code, 406)
+
+
+    }
+
+    @Test
+    fun `deve dar erro interno para deletar`(){
+
+        val requestGrpc = KeyRemoveRequest.newBuilder()
+            .setIdUsuario("123")
+            .setChave("123")
+            .build()
+
+        val removeChaveRequest= RemoveChaveRequest(requestGrpc.idUsuario, requestGrpc.chave)
+
+
+        Mockito.`when`(gRpcClientRemove.remove(requestGrpc)).thenThrow(Status.INTERNAL.asRuntimeException())
+
+        val resultado = Assertions.assertThrows(HttpClientResponseException::class.java) {
+            client.toBlocking()
+                .exchange<RemoveChaveRequest, RemoveChaveResponse>(HttpRequest.POST("/api/remove", removeChaveRequest))
+        }
+        Assertions.assertEquals(resultado.status.code, 500)
+
+
+    }
+
+
+    @Factory
+    @Replaces(factory = GrpcClientFactory::class)
+    internal class factoryMockRemove{
+        @Singleton
+        fun gRpcClient() = Mockito.mock(KeyManagerRemoveGrpc.KeyManagerRemoveBlockingStub::class.java)
     }
 
 

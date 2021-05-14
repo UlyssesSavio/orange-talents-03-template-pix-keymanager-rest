@@ -1,5 +1,6 @@
 package br.com.zup.edu.grpcClient
 
+import br.com.zup.edu.KeyManagerRemoveGrpc
 import br.com.zup.edu.KeyManagerServiceGrpc
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
@@ -14,6 +15,12 @@ class GrpcClientFactory {
     fun cadastraClientStub(@GrpcChannel("keyManager") channel: ManagedChannel): KeyManagerServiceGrpc.KeyManagerServiceBlockingStub?{
 
         return KeyManagerServiceGrpc.newBlockingStub(channel)
+    }
+
+    @Singleton
+    fun removeClientStub(@GrpcChannel("keyManager") channel: ManagedChannel): KeyManagerRemoveGrpc.KeyManagerRemoveBlockingStub?{
+        return KeyManagerRemoveGrpc.newBlockingStub(channel)
+
     }
 
 }
