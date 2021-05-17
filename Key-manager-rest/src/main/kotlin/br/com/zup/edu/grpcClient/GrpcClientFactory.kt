@@ -1,9 +1,11 @@
 package br.com.zup.edu.grpcClient
 
+import br.com.zup.edu.KeyManagerCarregaGrpc
 import br.com.zup.edu.KeyManagerRemoveGrpc
 import br.com.zup.edu.KeyManagerServiceGrpc
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
+import io.grpc.stub.AbstractBlockingStub
 import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import javax.inject.Singleton
@@ -21,6 +23,11 @@ class GrpcClientFactory {
     fun removeClientStub(@GrpcChannel("keyManager") channel: ManagedChannel): KeyManagerRemoveGrpc.KeyManagerRemoveBlockingStub?{
         return KeyManagerRemoveGrpc.newBlockingStub(channel)
 
+    }
+
+    @Singleton
+    fun buscaClientStub(@GrpcChannel("keyManager") channel: ManagedChannel): KeyManagerCarregaGrpc.KeyManagerCarregaBlockingStub?{
+        return KeyManagerCarregaGrpc.newBlockingStub(channel)
     }
 
 }
