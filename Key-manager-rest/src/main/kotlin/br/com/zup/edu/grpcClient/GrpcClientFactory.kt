@@ -1,6 +1,7 @@
 package br.com.zup.edu.grpcClient
 
 import br.com.zup.edu.KeyManagerCarregaGrpc
+import br.com.zup.edu.KeyManagerListaGrpc
 import br.com.zup.edu.KeyManagerRemoveGrpc
 import br.com.zup.edu.KeyManagerServiceGrpc
 import io.grpc.ManagedChannel
@@ -29,5 +30,11 @@ class GrpcClientFactory {
     fun buscaClientStub(@GrpcChannel("keyManager") channel: ManagedChannel): KeyManagerCarregaGrpc.KeyManagerCarregaBlockingStub?{
         return KeyManagerCarregaGrpc.newBlockingStub(channel)
     }
+
+    @Singleton
+    fun listaClientStub(@GrpcChannel("keyManager") channel: ManagedChannel): KeyManagerListaGrpc.KeyManagerListaBlockingStub?{
+        return KeyManagerListaGrpc.newBlockingStub(channel)
+    }
+
 
 }

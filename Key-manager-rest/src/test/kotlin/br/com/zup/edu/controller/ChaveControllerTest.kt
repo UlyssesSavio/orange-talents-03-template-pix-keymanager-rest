@@ -38,11 +38,15 @@ internal class ChaveControllerTest {
     @Inject
     lateinit var gRpcClientBusca: KeyManagerCarregaGrpc.KeyManagerCarregaBlockingStub
 
+    @Inject
+    lateinit var gRpcClientLista: KeyManagerListaGrpc.KeyManagerListaBlockingStub
+
     @AfterEach
     fun antesDeCada() {
         Mockito.reset(gRpcClient)
         Mockito.reset(gRpcClientRemove)
         Mockito.reset(gRpcClientBusca)
+        Mockito.reset(gRpcClientLista)
 
     }
 
@@ -397,7 +401,6 @@ internal class ChaveControllerTest {
 
     @Test
     fun `deve nao buscar uma chave cadastrada por pix id e client id erro interno`() {
-        val carregaChavePixResponse = criaChavePixResponse()
 
         val grpcRequest = CarregaChavePixRequest.newBuilder().setPixId(
             CarregaChavePixRequest.newBuilder()
@@ -414,6 +417,77 @@ internal class ChaveControllerTest {
         Assertions.assertEquals(resultado.status.code, 500)
     }
 
+    @Test
+    fun `deve buscar lista de chaves`(){
+
+        val requestGrpc = ListaChavesPixRequest.newBuilder().setClientId("123").build()
+        val responseGrpc = criaChavePixListaResponse()
+
+        Mockito.`when`(gRpcClientLista.lista(requestGrpc)).thenReturn(responseGrpc)
+
+        //val resultado = client.toBlocking().exchange<String, ListaChaveResponse>(HttpRequest.GET("/api/lista/123"))
+        val resultado =
+            client.toBlocking().exchange<String,ListaChaveResponse>(HttpRequest.GET("/api/lista/123"),
+                ListaChaveResponse::class.java)
+
+        Assertions.assertEquals(resultado!!.status.code, 200)
+        Assertions.assertEquals(resultado.body().chaves!!.size, 2)
+
+    }
+
+
+    @Test
+    fun `deve buscar lista vazia de chaves`(){
+
+        val requestGrpc = ListaChavesPixRequest.newBuilder().setClientId("123").build()
+
+        Mockito.`when`(gRpcClientLista.lista(requestGrpc)).thenReturn(ListaChavesPixResponse.newBuilder()
+            .setClienteId("123").build())
+
+        val resultado =
+            client.toBlocking().exchange<String,ListaChaveResponse>(HttpRequest.GET("/api/lista/123"),
+                ListaChaveResponse::class.java)
+
+        Assertions.assertEquals(resultado.status.code, 200)
+        Assertions.assertNull(resultado.body().chaves)
+
+    }
+
+
+    fun criaChavePixListaResponse(): ListaChavesPixResponse{
+        val chave1 = ListaChavesPixResponse.ChavePix.newBuilder()
+            .setChave("123")
+            .setCriadaEm(
+                Timestamp.newBuilder()
+                    .setNanos(123)
+                    .setSeconds(123)
+                    .build()
+            )
+            .setPixId("123")
+            .setTipoChave(tipoChave.CPF)
+            .setTipoConta(tipo.CONTA_CORRENTE)
+            .build()
+
+        val chave2 = ListaChavesPixResponse.ChavePix.newBuilder()
+            .setChave("123")
+            .setCriadaEm(
+                Timestamp.newBuilder()
+                    .setNanos(123)
+                    .setSeconds(123)
+                    .build()
+            )
+            .setPixId("123")
+            .setTipoChave(tipoChave.CPF)
+            .setTipoConta(tipo.CONTA_CORRENTE)
+            .build()
+
+       return ListaChavesPixResponse.newBuilder().addChaves(chave1).addChaves(chave2).setClienteId("123").build()
+
+
+
+
+
+    }
 
     fun criaChavePixResponse():CarregaChavePixResponse{
         return CarregaChavePixResponse.newBuilder()
@@ -436,6 +510,13 @@ internal class ChaveControllerTest {
             .build()
     }
 
+
+    @Factory
+    @Replaces(factory = GrpcClientFactory::class)
+    internal class factoryMockLista{
+        @Singleton
+        fun gRpcClientLista() = Mockito.mock(KeyManagerListaGrpc.KeyManagerListaBlockingStub::class.java)
+    }
     @Factory
     @Replaces(factory = GrpcClientFactory::class)
     internal class factoryMockBusca{
