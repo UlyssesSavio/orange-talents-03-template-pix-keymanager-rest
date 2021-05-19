@@ -76,3 +76,5 @@ data class CadastraChaveRequest(@field:NotBlank val idCliente:String,
                                 @field:Size(max=77) val chave:String?=null,
                                 @field:NotBlank val tipoConta: tipo,
                                 @field:NotBlank val tipoChave: tipoChave)
+
+

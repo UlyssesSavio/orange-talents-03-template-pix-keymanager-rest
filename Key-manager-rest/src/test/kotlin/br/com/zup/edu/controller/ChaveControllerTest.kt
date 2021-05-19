@@ -332,7 +332,6 @@ internal class ChaveControllerTest {
 
     @Test
     fun `deve nao encontrar chave buscada`() {
-        val carregaChavePixResponse = criaChavePixResponse()
 
         val grpcRequest = CarregaChavePixRequest.newBuilder().setChave("123").build()
 
@@ -348,7 +347,6 @@ internal class ChaveControllerTest {
 
     @Test
     fun `deve nao erro interno ao buscar chave por chave`() {
-        val carregaChavePixResponse = criaChavePixResponse()
 
         val grpcRequest = CarregaChavePixRequest.newBuilder().setChave("123").build()
 
@@ -382,7 +380,6 @@ internal class ChaveControllerTest {
 
     @Test
     fun `deve nao buscar uma chave cadastrada por pix id e client id nao encontrada`() {
-        val carregaChavePixResponse = criaChavePixResponse()
 
         val grpcRequest = CarregaChavePixRequest.newBuilder().setPixId(
             CarregaChavePixRequest.newBuilder()

@@ -17,6 +17,7 @@ class GrpcClientFactory {
     @Singleton
     fun cadastraClientStub(@GrpcChannel("keyManager") channel: ManagedChannel): KeyManagerServiceGrpc.KeyManagerServiceBlockingStub?{
 
+
         return KeyManagerServiceGrpc.newBlockingStub(channel)
     }
 
