@@ -1,0 +1,13 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      java: openjdk8
+  build:
+    commands:
+      - ./gradlew shadowJar --scan
+
+artifacts:
+  files:
+    - '*-all.jar'
+  base-directory: 'build/libs'

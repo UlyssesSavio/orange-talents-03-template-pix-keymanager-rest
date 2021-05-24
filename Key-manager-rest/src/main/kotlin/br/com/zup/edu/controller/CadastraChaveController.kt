@@ -27,6 +27,8 @@ class CadastraChaveController(@Inject val gRpcClient: KeyManagerServiceGrpc.KeyM
 
     @Post("/api/cadastra")
     fun cadastra(@Body @Valid request: CadastraChaveRequest) : HttpResponse<CadastraChaveResponse>{
+
+        println("Entrou cadastra chave")
         val requestGrpc = KeyPixRequest.newBuilder()
             .setChaveASerGerada(request.chave)
             .setIdentificadorCliente(request.idCliente)
@@ -35,7 +37,11 @@ class CadastraChaveController(@Inject val gRpcClient: KeyManagerServiceGrpc.KeyM
             .build()
 
         try {
+            println("chamando grpc")
+
             val cadastra = gRpcClient.cadastra(requestGrpc)
+            println("chamou ${cadastra.chavePix}")
+
             val cadastraChaveResponse = CadastraChaveResponse(cadastra.chavePix)
             return HttpResponse.created(cadastraChaveResponse)
 
@@ -56,6 +62,7 @@ class CadastraChaveController(@Inject val gRpcClient: KeyManagerServiceGrpc.KeyM
             }
 
 
+            println("deu ruim")
             throw  HttpStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.message)//Code+description
 
         }
