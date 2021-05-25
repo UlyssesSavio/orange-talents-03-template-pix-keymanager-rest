@@ -2,6 +2,7 @@ package br.com.zup.edu.controller
 
 import br.com.zup.edu.*
 import br.com.zup.edu.anotacao.OpenClass
+import br.com.zup.edu.erro.ErrorHandler
 import io.grpc.StatusRuntimeException
 import io.micronaut.core.annotation.Introspected
 import io.micronaut.http.HttpResponse
@@ -15,6 +16,7 @@ import javax.inject.Inject
 import javax.validation.Valid
 import javax.validation.constraints.NotBlank
 
+@ErrorHandler
 @OpenClass
 @Controller
 @Introspected

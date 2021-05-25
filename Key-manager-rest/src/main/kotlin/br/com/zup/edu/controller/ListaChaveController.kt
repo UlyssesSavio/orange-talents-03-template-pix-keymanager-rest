@@ -2,6 +2,7 @@ package br.com.zup.edu.controller
 
 import br.com.zup.edu.*
 import br.com.zup.edu.anotacao.OpenClass
+import br.com.zup.edu.erro.ErrorHandler
 import io.micronaut.core.annotation.Introspected
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.Controller
@@ -11,6 +12,7 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import javax.inject.Inject
 
+@ErrorHandler
 @OpenClass
 @Controller
 class ListaChaveController(@Inject val gRpcClient: KeyManagerListaGrpc.KeyManagerListaBlockingStub) {

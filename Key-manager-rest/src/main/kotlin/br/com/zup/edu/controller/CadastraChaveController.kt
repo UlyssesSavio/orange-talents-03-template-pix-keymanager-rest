@@ -3,14 +3,18 @@ package br.com.zup.edu.controller
 import br.com.zup.edu.KeyManagerServiceGrpc
 import br.com.zup.edu.KeyPixRequest
 import br.com.zup.edu.anotacao.OpenClass
+import br.com.zup.edu.erro.ErroPadrao
+import br.com.zup.edu.erro.ErrorHandler
 import br.com.zup.edu.tipo
 import br.com.zup.edu.tipoChave
 import io.grpc.StatusRuntimeException
 import io.micronaut.core.annotation.Introspected
+import io.micronaut.http.HttpRequest
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.HttpStatus
 import io.micronaut.http.annotation.Body
 import io.micronaut.http.annotation.Controller
+import io.micronaut.http.annotation.Error
 import io.micronaut.http.annotation.Get
 import io.micronaut.http.annotation.Post
 import io.micronaut.http.exceptions.HttpStatusException
@@ -19,6 +23,7 @@ import javax.validation.Valid
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.Size
 
+@ErrorHandler
 @OpenClass
 @Controller
 @Introspected
@@ -37,7 +42,6 @@ class CadastraChaveController(@Inject val gRpcClient: KeyManagerServiceGrpc.KeyM
             .build()
 
         try {
-            println("chamando grpc")
 
             val cadastra = gRpcClient.cadastra(requestGrpc)
             println("chamou ${cadastra.chavePix}")
@@ -50,19 +54,21 @@ class CadastraChaveController(@Inject val gRpcClient: KeyManagerServiceGrpc.KeyM
             val statusCode = e.status.code
 
             if(statusCode == io.grpc.Status.Code.NOT_FOUND){
+
                 throw HttpStatusException(HttpStatus.NOT_FOUND, description)
             }
 
             if(statusCode == io.grpc.Status.Code.INVALID_ARGUMENT){
+
                 throw HttpStatusException(HttpStatus.BAD_REQUEST, description)
             }
 
             if(statusCode == io.grpc.Status.Code.ALREADY_EXISTS){
+
                 throw HttpStatusException(HttpStatus.FORBIDDEN, description)
             }
 
 
-            println("deu ruim")
             throw  HttpStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.message)//Code+description
 
         }
@@ -72,7 +78,13 @@ class CadastraChaveController(@Inject val gRpcClient: KeyManagerServiceGrpc.KeyM
 
     }
 
+
+
+
 }
+
+
+
 @OpenClass
 @Introspected
 data class CadastraChaveResponse(val chavePix:String)

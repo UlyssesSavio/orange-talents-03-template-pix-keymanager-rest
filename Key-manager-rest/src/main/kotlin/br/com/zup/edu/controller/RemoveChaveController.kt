@@ -3,6 +3,7 @@ package br.com.zup.edu.controller
 import br.com.zup.edu.KeyManagerRemoveGrpc
 import br.com.zup.edu.KeyRemoveRequest
 import br.com.zup.edu.anotacao.OpenClass
+import br.com.zup.edu.erro.ErrorHandler
 import io.grpc.StatusRuntimeException
 import io.micronaut.core.annotation.Introspected
 import io.micronaut.http.HttpResponse
@@ -16,7 +17,7 @@ import javax.validation.Valid
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.Size
 
-
+@ErrorHandler
 @OpenClass
 @Controller
 @Introspected
